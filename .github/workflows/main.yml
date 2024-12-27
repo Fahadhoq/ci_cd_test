@@ -11,24 +11,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Check out the repository code
       - name: Checkout Code
-        uses: actions/checkout@v3 # Checks out your repository's code
+        uses: actions/checkout@v3
 
+      # Step 2: Debug - List repository structure
+      - name: List Repository Structure
+        run: ls -la
+
+      # Step 3: Install dependencies (if package.json exists)
       - name: Install Dependencies
-        run: npm install # Install dependencies
+        if: ${{ exists('package.json') }} # Run this step only if package.json exists
+        run: npm install
 
+      # Step 4: Build the project (if required, like for React or similar apps)
       - name: Build Project
-        run: npm run build # Build the project (output is usually in 'build/')
+        if: ${{ exists('package.json') }} # Run this step only if package.json exists
+        run: npm run build
+        working-directory: ./ # Change if package.json is in a subdirectory (e.g., ./frontend/)
 
+      # Step 5: Debug - Verify build directory exists
+      - name: Verify Build Directory
+        run: ls -la ./build/ # Check that the build directory was created
+
+      # Step 6: FTP Deploy
       - name: FTP Deploy Forked
         uses: snorux/FTP-Deploy-Action@1.3.2
         with:
-          server: ftpupload.net # FTP server address
-          username: if0_37694479 # FTP username
-          password: qLQphFCzJXW # Securely reference FTP password
-          protocol: ftps # Use FTPS for security
+          server: ftpupload.net # Replace with your FTP server address
+          username: if0_37694479 # Replace with your FTP username
+          password: qLQphFCzJXW # Use GitHub Secrets for security
+          protocol: ftps # Use secure protocol
           port: 21 # Default FTP port
-          local-dir: ./build/ # Directory with built files
-          server-dir: /htdocs/getUp_Assignment/ # Remote directory
-          log-level: verbose # Options: minimal, standard, verbose
-          dry-run: true # Set to 'true' for testing
+          local-dir: ./build/ # Path to the files you want to deploy
+          server-dir: /htdocs/getUp_Assignment/ # Path on the FTP server
+          state-name: deploy-state.json # Track file changes for efficient deployment
+          log-level: standard # Options: minimal, standard, verbose
+          dry-run: false # Set to true to test without deploying
+          dangerous-clean-slate: false # Use with caution to clear server-dir before deployment
+          exclude: |
+            .git*
+            node_modules/
+            *.log
+            *.md
+          max-retries: 3 # Retry failed connections
+

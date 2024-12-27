@@ -3,7 +3,7 @@ name: FTP Deployment
 on:
   push:
     branches:
-      - main # Trigger deployment on pushes to the 'main' branch
+      - main
 
 jobs:
   deploy:
@@ -11,68 +11,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the repository code
+      # Step 1: Check out repository code
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      # Step 2: Debug - List repository structure
-      - name: List Repository Structure
+      # Step 2: Debug repository structure
+      - name: List Repository Files
         run: ls -la
 
-      # Step 3: Check for package.json
+      # Step 3: Navigate to Project Directory (if applicable)
+      - name: Navigate to Frontend Directory
+        run: |
+          if [ -d frontend ]; then
+            echo "Navigating to 'frontend' directory."
+            cd frontend
+          else
+            echo "'frontend' directory not found. Running from root."
+          fi
+
+      # Step 4: Check for package.json
       - name: Check for package.json
         run: |
           if [ -f package.json ]; then
-            echo "package.json exists."
+            echo "package.json exists:"
             cat package.json
           else
             echo "package.json not found! Exiting..."
             exit 1
           fi
 
-      # Step 4: Install dependencies
+      # Step 5: Install dependencies
       - name: Install Dependencies
         run: npm install
 
-      # Step 5: Check node_modules and Dependencies
-      - name: Check Installed Node Modules
-        run: |
-          if [ -d node_modules ]; then
-            echo "node_modules directory exists."
-            ls -la node_modules
-          else
-            echo "node_modules directory not found! Exiting..."
-            exit 1
-          fi
-
-      # Step 6: Run Build Command
+      # Step 6: Build the project
       - name: Build Project
-        run: |
-          echo "Running build process..."
-          npm run build || (echo "Build process failed!" && exit 1)
+        run: npm run build
 
-      # Step 7: Inspect Build Output
-      - name: Inspect Build Output
-        run: |
-          echo "Inspecting build output..."
-          ls -la ./build || echo "Build directory not found."
-          ls -la ./dist || echo "Dist directory not found."
-
-      # Step 8: Verify Build Directory
+      # Step 7: Verify build directory
       - name: Verify Build Directory
         run: |
           if [ -d ./build ]; then
             echo "Build directory exists:"
-            ls -la ./build/
-          elif [ -d ./dist ]; then
-            echo "Dist directory exists:"
-            ls -la ./dist/
+            ls -la ./build
           else
-            echo "No valid build directory found. Please check your build step."
+            echo "Build directory not found! Exiting..."
             exit 1
           fi
 
-      # Step 9: FTP Deploy
+      # Step 8: FTP Deploy
       - name: FTP Deploy Forked
         uses: snorux/FTP-Deploy-Action@1.3.2
         with:
@@ -81,15 +70,5 @@ jobs:
           password: qLQphFCzJXW
           protocol: ftps
           port: 21
-          local-dir: ./build/ # Adjust if the directory is different (e.g., ./dist)
+          local-dir: ./build/
           server-dir: /htdocs/getUp_Assignment/
-          state-name: deploy-state.json
-          log-level: standard
-          dry-run: false
-          dangerous-clean-slate: false
-          exclude: |
-            .git*
-            node_modules/
-            *.log
-            *.md
-          max-retries: 3

@@ -28,16 +28,19 @@ jobs:
             echo "package.json not found, skipping npm install."
           fi
 
-      # Step 4: Build the project (if package.json exists)
-      - name: Build Project
+      # Step 4: Debug Build Process
+      - name: Debug Build Process
         run: |
           if [ -f package.json ]; then
-            npm run build
+            echo "Running build process..."
+            npm run build || exit 1
+            echo "Build output:"
+            ls -la
           else
             echo "package.json not found, skipping build step."
           fi
 
-      # Step 5: Debug - Verify build directory exists
+      # Step 5: Verify Build Directory
       - name: Verify Build Directory
         run: |
           if [ -d ./build ]; then

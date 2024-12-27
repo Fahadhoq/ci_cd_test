@@ -1,0 +1,40 @@
+name: FTP Deployment
+
+on:
+  push:
+    branches:
+      - main # Trigger deployment on pushes to the 'main' branch
+
+jobs:
+  deploy:
+    name: FTP Deploy Job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3 # Checks out your repository's code
+
+      - name: FTP Deploy Forked
+        uses: snorux/FTP-Deploy-Action@1.3.2
+        with:
+          # Required fields
+          server: ftpupload.net # FTP server address
+          username: if0_37694479 # Your InfinityFree FTP username
+          password: qLQphFCzJXW # Securely reference your FTP password
+          protocol: ftps # Choose secure protocol
+
+          # Optional fields
+          port: 21 # Default FTP port
+          local-dir: ./build/ # Directory containing files to upload
+          server-dir: /htdocs/getUp_Assignment/ # Target directory on the server
+          state-name: deploy-state.json # Track file changes for optimized deployment
+          dry-run: false # Set to 'true' for testing without deploying
+          dangerous-clean-slate: false # Use with caution to delete all contents of server-dir
+          exclude: |
+            .git*
+            node_modules/
+            *.log
+            *.md
+          log-level: info # Verbosity level: warn, info, debug
+          max-retries: 3 # Number of retries on failed connections
+          security: strict # Options: strict, loose

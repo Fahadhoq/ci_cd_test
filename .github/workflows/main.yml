@@ -21,18 +21,32 @@ jobs:
 
       # Step 3: Install dependencies (if package.json exists)
       - name: Install Dependencies
-        if: ${{ exists('package.json') }} # Run this step only if package.json exists
-        run: npm install
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          else
+            echo "package.json not found, skipping npm install."
+          fi
 
-      # Step 4: Build the project (if required, like for React or similar apps)
+      # Step 4: Build the project (if package.json exists)
       - name: Build Project
-        if: ${{ exists('package.json') }} # Run this step only if package.json exists
-        run: npm run build
-        working-directory: ./ # Change if package.json is in a subdirectory (e.g., ./frontend/)
+        run: |
+          if [ -f package.json ]; then
+            npm run build
+          else
+            echo "package.json not found, skipping build step."
+          fi
 
       # Step 5: Debug - Verify build directory exists
       - name: Verify Build Directory
-        run: ls -la ./build/ # Check that the build directory was created
+        run: |
+          if [ -d ./build ]; then
+            echo "Build directory exists:"
+            ls -la ./build/
+          else
+            echo "Build directory does not exist. Please check your build step."
+            exit 1
+          fi
 
       # Step 6: FTP Deploy
       - name: FTP Deploy Forked
@@ -55,4 +69,3 @@ jobs:
             *.log
             *.md
           max-retries: 3 # Retry failed connections
-

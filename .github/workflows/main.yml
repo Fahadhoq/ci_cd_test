@@ -20,7 +20,7 @@ jobs:
           # Required fields
           server: ftpupload.net # FTP server address
           username: if0_37694479 # Your InfinityFree FTP username
-          password: ${{ secrets.FTP_PASSWORD }} # Securely reference your FTP password
+          password: qLQphFCzJXW # Securely reference your FTP password
           protocol: ftps # Choose secure protocol
 
           # Optional fields

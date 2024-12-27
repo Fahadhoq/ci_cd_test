@@ -20,7 +20,7 @@ jobs:
           # Required fields
           server: ftpupload.net # FTP server address
           username: if0_37694479 # Your InfinityFree FTP username
-          password: qLQphFCzJXW # Securely reference your FTP password
+          password: ${{ secrets.FTP_PASSWORD }} # Securely reference your FTP password
           protocol: ftps # Choose secure protocol
 
           # Optional fields
@@ -35,6 +35,6 @@ jobs:
             node_modules/
             *.log
             *.md
-          log-level: info # Verbosity level: warn, info, debug
+          log-level: standard # Options: minimal, standard, verbose
           max-retries: 3 # Number of retries on failed connections
           security: strict # Options: strict, loose
